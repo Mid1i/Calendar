@@ -9,12 +9,15 @@
 	const currentYear = ref<number>(currentDate.getFullYear());
 	const currentMonth = ref<number>(currentDate.getMonth());
 
-	const setMonth = (isPrevious?: boolean) => {
+
+	const changeMonth = (isPrevious?: boolean): void => {
 		if (isPrevious) {
-			currentMonth.value = currentMonth.value === 0 ? 11 : currentMonth.value - 1;
-		} else {
-			currentMonth.value = currentMonth.value === 11 ? 0 : currentMonth.value + 1;
-		}
+        currentMonth.value = (currentMonth.value + 11) % 12;
+        if (currentMonth.value === 11) currentYear.value--;
+    } else {
+        currentMonth.value = (currentMonth.value + 1) % 12;
+        if (currentMonth.value === 0) currentYear.value++;
+    }
 	}
 </script>
 
@@ -22,7 +25,7 @@
 <template>
 	<div class="container">
 		<CurrentDate
-			@changeMonth="setMonth"
+			@changeMonth="changeMonth"
 			:month="currentMonth"
 			:year="currentYear"
 		/>

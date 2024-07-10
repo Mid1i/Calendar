@@ -14,46 +14,30 @@
 		year: number
 	}>();
 
-
 	const WEEK_DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
 
-	const getDays = computed(() => {
-		let d = new Date(props.year, props.month);
+	const getMonthDates = computed(() => {
+		let date = new Date(props.year, props.month);
+		let monthDates: IDay[] = [];
+		const firstDayOfMonth = getDay(date);
+
+		date.setDate(date.getDate() - firstDayOfMonth);
+
+		const previousMonthCondition = (): boolean => monthDates.length < firstDayOfMonth;
+		const currentMonthCondition = (): boolean => date.getMonth() === props.month;
+		const nextMonthCondition = (): boolean => getDay(date) !== 0 && getDay(date) < 7;
 		
-		let days: IDay[] = [];
-		let prevDays = 0;
+		while (previousMonthCondition() || currentMonthCondition() || nextMonthCondition()) {
+			monthDates.push({
+				date: date.getDate(),
+				isMuted: !currentMonthCondition()
+			});
 
-		for (let i = 0; i < getDay(d); i++) {
-			prevDays++;
-		}
-		
-		for (let i = 0; i < prevDays; i++) {
-			d.setDate(d.getDate() - prevDays + i);
-			days.push({
-				date: d.getDate(),
-				isMuted: true
-			})
-
-			d = new Date(props.year, props.month);
+			date.setDate(date.getDate() + 1);
 		}
 
-		while (d.getMonth() === props.month) {
-			days.push({date:d.getDate()});
-			d.setDate(d.getDate() + 1);
-		}
-
-		if (getDay(d) !== 0) {
-			for (let i = getDay(d); i < 7; i++) {
-				days.push({
-					date: d.getDate(),
-					isMuted: true
-				})
-				d.setDate(d.getDate() + 1);
-			}
-		}
-
-		return days;
+		return monthDates;
 	});
 </script>
 
@@ -69,7 +53,7 @@
 				{{ day }}
 			</span>
 			<span 
-				v-for="(day, index) in getDays" 
+				v-for="(day, index) in getMonthDates" 
 				:key="index"
 				:class="['calendar__body-item', day.isMuted && 'muted']"
 			>
