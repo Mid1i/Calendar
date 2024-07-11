@@ -1,16 +1,17 @@
 // Background colors
 $--primary-back: #000000;
 $--secondary-back: #1C1C1E;
+$--tertiary-back: #2C2C2E;
 
 // Text colors
 $--primary-text: #FFFFFF;
-$--secondary-text: rgb(235, 235, 245, .6);
+$--secondary-text: rgb(235, 235, 245, .3);
 
 // Accent colors
-$--red: #FF7782;
-$--blue: #7380EC;
-$--green: #41F1B6;
-$--yellow: #FFBB55;
+$--red: #FF453A;
+$--blue: #0A84FF;
+$--green: #4CD964;
+$--yellow: #FFCC00;
 
-
-$--cell: 40px;
+// Calendar cell sizes
+$--cell: 50px;

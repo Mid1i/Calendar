@@ -7,6 +7,10 @@
 		month: number,
 		year: number
 	}>();
+
+	defineEmits<{
+		(e: "changeMonth", isPrevious?: boolean): void
+	}>();
 </script>
 
 
@@ -20,16 +24,20 @@
 
 
 <style scoped lang="scss">
+	@import "@/assets/styles/variables.scss";
+
+
 	.header {
 		align-items: center;
 		display: flex;
 		justify-content: space-between;
 
-		margin-bottom: 10px;
+		margin-bottom: 15px;
+		width: 100%;
 
 		&__title {
-			font-size: 18px;
-			font-weight: 400;
+			font-size: 24px;
+			font-weight: 600;
 		}
 	}
 </style>

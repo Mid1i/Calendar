@@ -23,3 +23,6 @@ export const getDay = (date: Date): number => {
 
 	return day === 0 ? 6 : day - 1;
 }
+
+
+export const dateToString = (date: Date): string => `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`;

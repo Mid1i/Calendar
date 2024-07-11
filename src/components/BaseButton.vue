@@ -24,7 +24,12 @@
 	.button {
 		background: transparent;
 		
-		height: 30px;
-		width: 30px;
+		height: 20px;
+		width: 20px;
+
+		&__icon {
+			height: 100%;
+			width: 100%;
+		}
 	}
 </style>

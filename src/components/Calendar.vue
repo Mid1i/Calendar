@@ -1,65 +1,74 @@
 <script setup lang="ts">
-	import { computed } from "vue";
-	import { getDay } from "@/helpers/calendar";
+	import { computed, ref, inject } from "vue";
+	import type { TypeActions } from "@/interfaces/IDay";
+	import CalendarHeader from "@/components/CalendarHeader.vue";
+	import CalendarBody from "@/components/CalendarBody.vue";
+	// import CalendarFooter from "@/components/CalendarFooter.vue";
 
 
-	interface IDay {
-		date: number,
-		isMuted?: boolean
-	}
+	const action = <TypeActions>inject("action");
+
+	const currentDate = new Date();
+
+	const currentYear = ref<number>(currentDate.getFullYear());
+	const currentMonth = ref<number>(currentDate.getMonth());
+
+	const selectedDates = ref<string[]>([]);
 
 
-	const props = defineProps<{
-		month: number,
-		year: number
-	}>();
-
-	const WEEK_DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
-
-	const getMonthDates = computed(() => {
-		let date = new Date(props.year, props.month);
-		let monthDates: IDay[] = [];
-		const firstDayOfMonth = getDay(date);
-
-		date.setDate(date.getDate() - firstDayOfMonth);
-
-		const previousMonthCondition = (): boolean => monthDates.length < firstDayOfMonth;
-		const currentMonthCondition = (): boolean => date.getMonth() === props.month;
-		const nextMonthCondition = (): boolean => getDay(date) !== 0 && getDay(date) < 7;
-		
-		while (previousMonthCondition() || currentMonthCondition() || nextMonthCondition()) {
-			monthDates.push({
-				date: date.getDate(),
-				isMuted: !currentMonthCondition()
-			});
-
-			date.setDate(date.getDate() + 1);
+	const getTitle = computed<string>(() => {
+		const titles: Record<string, string> = {
+			oneDate: "Выберите дату формирования отчёта",
+			severalDates: "Выберите даты формирования отчёта",
+			onePeriod: "Выберите период формирования отчёта",
+			severalPeriods: "Выберите периоды формирования отчёта"
 		}
 
-		return monthDates;
-	});
+		return titles[action];
+	})
+
+	const changeMonth = (isPrevious?: boolean): void => {
+		if (isPrevious) {
+        currentMonth.value = (currentMonth.value + 11) % 12;
+        if (currentMonth.value === 11) currentYear.value--;
+    } else {
+        currentMonth.value = (currentMonth.value + 1) % 12;
+        if (currentMonth.value === 0) currentYear.value++;
+    }
+	}
+
+	const updateSelectedDates = (date: string): void => {
+		if (action === "oneDate") {
+			selectedDates.value = selectedDates.value[0] === date ? [] : [date];
+		}
+
+		if (action === "severalDates") {
+			isSelected(date) ? selectedDates.value = [...selectedDates.value.filter(item => item !== date)] : selectedDates.value.push(date);
+		}
+
+		if (action === "onePeriod") {
+			selectedDates.value.length === 2 ? selectedDates.value = [] : selectedDates.value.push(date);
+		}
+	}
+
+	const isSelected = (date: string): boolean => !!selectedDates.value.find(item => item === date);
 </script>
 
 
 <template>
-	<div class="calendar">
-		<div class="calendar__body">
-			<span 
-				v-for="day in WEEK_DAYS"
-				:key="day"
-				class="calendar__body-header"
-			>
-				{{ day }}
-			</span>
-			<span 
-				v-for="(day, index) in getMonthDates" 
-				:key="index"
-				:class="['calendar__body-item', day.isMuted && 'muted']"
-			>
-				{{ day.date }}
-			</span>
-		</div>
+	<h1 class="title">{{ getTitle }}</h1>
+	<div class="wrapper">
+		<CalendarHeader
+			@change-month="changeMonth"
+			:month="currentMonth"
+			:year="currentYear"
+		/>
+		<CalendarBody
+			@update-selected-dates="updateSelectedDates"
+			:is-selected="isSelected"
+			:month="currentMonth"
+			:year="currentYear"
+		/>
 	</div>
 </template>
 
@@ -68,31 +77,12 @@
 	@import "@/assets/styles/variables.scss";
 
 
-	.calendar {
-		display: flex;
-		flex-direction: column;
+	.title {
+		font-size: 32px;
+		margin-bottom: 30px;
+	}
 
-		&__body {
-			font-size: 16px;
-
-			display: grid;
-			grid-template-columns: repeat(7, $--cell);
-
-			&-item, &-header {
-				align-items: center;
-				display: flex;
-				justify-content: center;
-
-				height: $--cell;
-
-				&.muted {
-					color: $--secondary-text;
-				}
-			}
-
-			&-header {
-				font-weight: 600;
-			}
-		}
+	.wrapper {
+		width: calc($--cell * 7);	
 	}
 </style>
