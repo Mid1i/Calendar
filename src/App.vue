@@ -22,13 +22,13 @@
 
 
 	.container {
-		align-items: flex-start;
+		background: $--secondary-back;
+		border-radius: 25px;
+
+		align-items: center;
 		display: flex;
 		flex-direction: column;
 
 		padding: 25px;
-
-		height: 100%;
-		width: 100%;
 	}
 </style>

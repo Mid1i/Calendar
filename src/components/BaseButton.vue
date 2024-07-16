@@ -24,8 +24,9 @@
 	.button {
 		background: transparent;
 		
-		height: 20px;
-		width: 20px;
+		padding: 5px;
+		height: 24px;
+		width: 24px;
 
 		&__icon {
 			height: 100%;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { getMonth } from "@/helpers/calendar";
+	import { convertNumberToMonth } from "@/helpers/converters";
 	import BaseButton from "@/components/BaseButton.vue";
 
 
@@ -17,7 +17,7 @@
 <template>
 	<header class="header">
 		<BaseButton @click="$emit('changeMonth', true)" isPrevious/>
-		<h1 class="header__title">{{ `${getMonth(month + 1)}, ${year}` }}</h1>
+		<h1 class="header__title">{{ `${convertNumberToMonth(month + 1)}, ${year}` }}</h1>
 		<BaseButton @click="$emit('changeMonth')"/>
 	</header>
 </template>
@@ -36,8 +36,8 @@
 		width: 100%;
 
 		&__title {
-			font-size: 24px;
-			font-weight: 600;
+			font-size: 20px;
+			font-weight: 400;
 		}
 	}
 </style>

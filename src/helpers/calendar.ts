@@ -1,21 +1,5 @@
-export const getMonth = (month: number): string => {
-	const months: Record<string, string> = {
-		1: "Январь",
-		2: "Февраль",
-		3: "Март",
-		4: "Апрель",
-		5: "Май",
-		6: "Июнь",
-		7: "Июль",
-		8: "Август",
-		9: "Сентябрь",
-		10: "Октябрь",
-		11: "Ноябрь",
-		12: "Декабрь",
-	}
-
-	return months[month];
-}
+import type { ISelectedDates } from "@/interfaces/IDay";
+import { convertStringToDate } from "@/helpers/converters";
 
 
 export const getDay = (date: Date): number => {
@@ -24,5 +8,26 @@ export const getDay = (date: Date): number => {
 	return day === 0 ? 6 : day - 1;
 }
 
+export const isInRange = (date: string, array: ISelectedDates[]): string => {
+	const currentDate = convertStringToDate(date);
 
-export const dateToString = (date: Date): string => `${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`;
+	for (let { from, to } of array) {
+		if (from && to) {
+			const fromDate = convertStringToDate(from);
+			const toDate = convertStringToDate(to);
+			
+			if (currentDate === fromDate && toDate) return "from";
+			if (currentDate === toDate) return "to";
+			if (fromDate < currentDate && currentDate < toDate) return "between";
+		}
+	}
+	
+	return "";
+}
+
+export const compareDates = (date: string, element: ISelectedDates): ISelectedDates => {
+	const date1 = convertStringToDate(element.from);
+	const date2 = convertStringToDate(date);
+
+	return (date1 < date2) ? { from: element.from, to: date } : { from: date, to: element.from };
+}

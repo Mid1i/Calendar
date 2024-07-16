@@ -1,11 +1,19 @@
 <script setup lang="ts">
-	import { computed } from "vue";
-	import type { IDay } from "@/interfaces/IDay";
-	import { getDay, dateToString } from "@/helpers/calendar";
+	import { computed, inject } from "vue";
+	import type { TypeActions, ISelectedDates } from "@/interfaces/IDay";
+	import { getDay, isInRange } from "@/helpers/calendar";
+	import { convertDateToString } from "@/helpers/converters";
+
+
+	interface IDay {
+		date: string,
+		isMuted: boolean
+	}
 
 
 	const props = defineProps<{
 		isSelected: (date: string) => boolean,
+		selectedDates: ISelectedDates[],
 		month: number,
 		year: number
 	}>();
@@ -14,12 +22,14 @@
 		(e: "updateSelectedDates", date: string): void
 	}>();
 
+
 	const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+
+	const currentAction = <TypeActions>inject("action");
 
 
 	const getMonthDates = computed(() => {
 		let date = new Date(props.year, props.month);
-		let currentDate = new Date();
 		let monthDates: IDay[] = [];
 		const firstDayOfMonth = getDay(date);
 		
@@ -31,9 +41,8 @@
 		
 		while (previousMonthCondition() || currentMonthCondition() || nextMonthCondition()) {
 			monthDates.push({
-				date: dateToString(date),
-				isMuted: !currentMonthCondition(),
-				isToday:dateToString(date) === dateToString(currentDate),
+				date: convertDateToString(date),
+				isMuted: !currentMonthCondition()
 			});
 			
 			date.setDate(date.getDate() + 1);
@@ -61,23 +70,25 @@
 			class="calendar__row"
 		>
 			<td
-				v-for="{ date, isMuted, isToday }, index) in getMonthDates.slice((num - 1) * 7, num * 7)"
+				v-for="{ date, isMuted }, index) in getMonthDates.slice((num - 1) * 7, num * 7)"
 				:key="index"
-				:class="['calendar__item']"
+				:class="[
+					'calendar__item',
+					(!isMuted && ['severalPeriods', 'onePeriod'].includes(currentAction)) && isInRange(date, selectedDates)
+				]"
 			>
 				<div
 					@click="() => !isMuted && $emit('updateSelectedDates', date)"
 					@keydown.enter="() => !isMuted && $emit('updateSelectedDates', date)"
 					:class="[
-						'calendar__item-button', 
+						'calendar__item-button',
 						isMuted && 'muted', 
-						isToday && 'today', 
 						isSelected(date) && 'selected'
 					]"
 					tabindex="0"
 				>
-					{{ date.split(".")[0] }}
-		</div>
+					{{ date.split(".")[1] }}
+				</div>
 			</td>
 		</tr>
 	</table>
@@ -88,6 +99,7 @@
 	@import "@/assets/styles/variables.scss";
 
 	.calendar {
+		border-collapse: collapse;
 		width: 100%;
 
 		&__header {
@@ -95,43 +107,78 @@
 
 			padding: 5px;
 			height: $--cell;
+			width: $--cell;
 		}
 
 		&__item {
 			padding: 5px;
+			position: relative;
+
 			height: $--cell;
 
+			&::before {
+				content: "";
+
+				position: absolute;
+				left: 0px;
+				top: 5px;
+
+				// transition: all 0.1s ease-in-out;
+				height: calc(100% - 10px);
+				width: calc(100% - 5px);
+				z-index: 0;
+			}
+
+			&.from::before {
+				background: $--dark-blue;
+				left: 5px;
+			}
+
+			&.between::before {
+				background: $--dark-blue;
+				width: 100%;
+			}
+
+			&.to::before {
+				background: $--dark-blue;
+			}
+
 			&-button {
+				border-radius: 5px;
+
 				align-items: center;
 				display: flex;
 				justify-content: center;
-				
-				border-radius: 100%;
 
 				color: $--primary-text;
+				cursor: pointer;
 				font-size: 16px;
 
-				transition: all 0.1s ease-in-out;
+				position: relative;
+
+				transition: background 0.1s ease-in-out;
 				height: 100%;
 				width: 100%;
-	
-				&.today {
-					color: $--blue;
-				}
-	
+				z-index: 1;
+
 				&.selected {
 					background: $--blue;
-					color: $--primary-text;
 				}
-
+	
 				&.muted {
-					background: transparent;
-					
 					color: $--secondary-text;
 					pointer-events: none;
 				}
 			}
+		}
+	}
 
+	@keyframes fillBackground {
+		0% {
+			background: transparent;
+		}
+		100% {
+			background: $--dark-blue;
 		}
 	}
 
@@ -144,9 +191,10 @@
 
 		.calendar__item-button.selected:hover,
 		.calendar__item-button.selected:focus {
-			background: lighten(#0A84FF, 5%);
+			background: lighten(#0A84FF, 10%);
 		}
 
+		.calendar__item-button.muted:hover,
 		.calendar__item-button.muted:focus {
 			background: transparent;
 		}
