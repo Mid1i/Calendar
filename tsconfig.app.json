@@ -30,7 +30,8 @@
       "@/assets/*": ["./src/assets/*"],
       "@/components/*": ["./src/components/*"],
       "@/helpers/*": ["./src/helpers/*"],
-      "@/interfaces/*": ["./src/interfaces/*"]
+      "@/interfaces/*": ["./src/interfaces/*"],
+      "@/types/*": ["./src/types/*"]
     }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]

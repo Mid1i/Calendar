@@ -1,10 +1,10 @@
 <script setup lang="ts">
 	import { provide } from "vue";
-	import type { TypeActions } from "./interfaces/IDay";
+	import type { TypeActions } from "@/types/TypeActions";
 	import Calendar from "@/components/Calendar.vue";
 
 
-	const action: TypeActions = "severalPeriods";
+	const action: TypeActions = "SEVERAL_DATES";
 
 	provide("action", action);
 </script>

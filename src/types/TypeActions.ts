@@ -1,0 +1,1 @@
+export type TypeActions = "ONE_DATE" | "SEVERAL_DATES" | "ONE_PERIOD" | "SEVERAL_PERIODS";

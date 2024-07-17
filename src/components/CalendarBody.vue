@@ -1,25 +1,25 @@
 <script setup lang="ts">
 	import { computed, inject } from "vue";
-	import type { TypeActions, ISelectedDates } from "@/interfaces/IDay";
-	import { convertDateToString } from "@/helpers/converters";
+	import type { ISelectedDates } from "@/interfaces/ISelectedDates";
+	import type { TypeActions } from "@/types/TypeActions";
 	import { getDay, isInRange } from "@/helpers/calendar";
 
 
 	interface IDay {
-		date: string,
+		date: Date,
 		isMuted: boolean
 	}
 
 
 	const props = defineProps<{
-		isSelected: (date: string) => boolean,
+		isSelected: (date: Date) => boolean,
 		selectedDates: ISelectedDates[],
 		month: number,
 		year: number
 	}>();
 
 	defineEmits<{
-		(e: "updateSelectedDates", date: string): void
+		(e: "updateSelectedDates", date: Date): void
 	}>();
 
 
@@ -31,6 +31,7 @@
 	const getMonthDates = computed(() => {
 		let date = new Date(props.year, props.month);
 		let monthDates: IDay[] = [];
+		
 		const firstDayOfMonth = getDay(date);
 		
 		date.setDate(date.getDate() - firstDayOfMonth);
@@ -41,7 +42,7 @@
 		
 		while (previousMonthCondition() || currentMonthCondition() || nextMonthCondition()) {
 			monthDates.push({
-				date: convertDateToString(date),
+				date: new Date(date),
 				isMuted: !currentMonthCondition()
 			});
 			
@@ -54,58 +55,57 @@
 
 
 <template>
-	<table class="calendar">
-		<tr class="calendar__row">
-			<th 
-				v-for="day in days"
-				:key="day"
-				class="calendar__header"
-			>
-				{{ day }}
-			</th>
-		</tr>
-		<tr
-			v-for="num in 6"
-			:key="num" 
-			class="calendar__row"
+	<div class="calendar">
+		<span 
+			v-for="day in days"
+			:key="day"
+			class="calendar__header"
 		>
-			<td
-				v-for="{ date, isMuted }, index) in getMonthDates.slice((num - 1) * 7, num * 7)"
-				:key="index"
+			{{ day }}
+		</span>
+		<span
+			v-for="{ date, isMuted }, index) in getMonthDates"
+			:key="index"
+			:class="[
+				'calendar__item',
+				(!isMuted && (currentAction === 'SEVERAL_PERIODS' || currentAction === 'ONE_PERIOD')) && isInRange(date, selectedDates),
+			]"
+		>
+			<span 
+				@click="() => !isMuted && $emit('updateSelectedDates',date)"
+				@keydown.enter="() => !isMuted && $emit('updateSelectedDates', date)"
 				:class="[
-					'calendar__item',
-					(!isMuted && ['severalPeriods', 'onePeriod'].includes(currentAction)) && isInRange(date, selectedDates)
+					'calendar__item-button',
+					isMuted && 'muted',
+					isSelected(date) && 'selected'
 				]"
+				tabindex="0"
 			>
-				<div
-					@click="() => !isMuted && $emit('updateSelectedDates', date)"
-					@keydown.enter="() => !isMuted && $emit('updateSelectedDates', date)"
-					:class="[
-						'calendar__item-button',
-						isMuted && 'muted', 
-						isSelected(date) && 'selected'
-					]"
-					tabindex="0"
-				>
-					{{ date.split(".")[1] }}
-				</div>
-			</td>
-		</tr>
-	</table>
+				{{ date.getDate() }}
+			</span>
+		</span>
+	</div>
 </template>
 
 
 <style scoped lang="scss">
 	@import "@/assets/styles/variables.scss";
 
+
 	.calendar {
-		border-collapse: collapse;
-		width: 100%;
+		display: grid;
+		grid-template-columns: repeat(7, $--cell);
+
+		margin-bottom: 20px;
 
 		&__header {
+			align-items: center;
+			display: flex;
+			justify-content: center;
+
+			color: $--primary-text;
 			font-weight: 600;
 
-			padding: 5px;
 			height: $--cell;
 			width: $--cell;
 		}
@@ -115,6 +115,7 @@
 			position: relative;
 
 			height: $--cell;
+			width: $--cell;
 
 			&::before {
 				content: "";
@@ -123,7 +124,6 @@
 				left: 0px;
 				top: 5px;
 
-				// transition: all 0.1s ease-in-out;
 				height: calc(100% - 10px);
 				width: calc(100% - 5px);
 				z-index: 0;
@@ -144,11 +144,11 @@
 			}
 
 			&-button {
-				border-radius: 5px;
-
 				align-items: center;
 				display: flex;
 				justify-content: center;
+
+				border-radius: 5px;
 
 				color: $--primary-text;
 				cursor: pointer;
@@ -172,6 +172,7 @@
 			}
 		}
 	}
+
 
 	@keyframes fillBackground {
 		0% {

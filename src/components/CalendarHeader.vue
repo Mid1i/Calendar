@@ -17,7 +17,7 @@
 <template>
 	<header class="header">
 		<BaseButton @click="$emit('changeMonth', true)" isPrevious/>
-		<h1 class="header__title">{{ `${convertNumberToMonth(month + 1)}, ${year}` }}</h1>
+		<h1 class="header__title">{{ `${convertNumberToMonth(month)}, ${year}` }}</h1>
 		<BaseButton @click="$emit('changeMonth')"/>
 	</header>
 </template>

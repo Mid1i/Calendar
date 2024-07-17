@@ -1,10 +1,10 @@
 <script setup lang="ts">
-	import { computed, ref, inject } from "vue";
-	import type { TypeActions, ISelectedDates } from "@/interfaces/IDay";
-	import CalendarHeader from "@/components/CalendarHeader.vue";
+	import { computed, inject, ref, watch } from "vue";
+	import type { ISelectedDates } from "@/interfaces/ISelectedDates";
+	import type { TypeActions } from "@/types/TypeActions";
 	import CalendarFooter from "@/components/CalendarFooter.vue";
+	import CalendarHeader from "@/components/CalendarHeader.vue";
 	import CalendarBody from "@/components/CalendarBody.vue";
-	import { convertStringToDate } from "@/helpers/converters";
 	import { compareDates } from "@/helpers/calendar";
 	import { getLastElement } from "@/helpers/global";
 
@@ -20,11 +20,11 @@
 
 
 	const getTitle = computed<string>(() => {
-		const titles: Record<string, string> = {
-			oneDate: "Выберите дату формирования отчёта",
-			severalDates: "Выберите даты формирования отчёта",
-			onePeriod: "Выберите период формирования отчёта",
-			severalPeriods: "Выберите периоды формирования отчёта"
+		const titles: Record<TypeActions, string> = {
+			ONE_DATE: "Выберите дату формирования отчёта",
+			SEVERAL_DATES: "Выберите даты формирования отчёта",
+			ONE_PERIOD: "Выберите период формирования отчёта",
+			SEVERAL_PERIODS: "Выберите периоды формирования отчёта"
 		}
 
 		return titles[currentAction];
@@ -41,18 +41,17 @@
     }
 	}
 
-
-	const updateSelectedDates = (date: string): void => {
-		const currentDate = convertStringToDate(date);
+	const updateSelectedDates = (date: Date): void => {
+		const currentDate = date.getTime();
 		const lastElement = getLastElement(selectedDates.value);
 
-		const isOneDateAction = currentAction === "oneDate";
-		const isSeveralDatesAction = currentAction === "severalDates";
-		const isOnePeriodAction = currentAction === "onePeriod";
+		const isOneDateAction = currentAction === "ONE_DATE";
+		const isSeveralDatesAction = currentAction === "SEVERAL_DATES";
+		const isOnePeriodAction = currentAction === "ONE_PERIOD";
 
 		if (isOneDateAction || isSeveralDatesAction) {
 			selectedDates.value = isSelected(date) 
-				? selectedDates.value.filter(item => item?.from !== date) 
+				? selectedDates.value.filter(item => item?.from.getTime() !== currentDate) 
 				: [...(isOneDateAction ? [] : selectedDates.value), { from: date }];
 
 			return;
@@ -66,8 +65,8 @@
 		if (lastElement?.to) {
 			for (let item of selectedDates.value) {
 				if (item.from && item?.to) {
-					const fromDate = convertStringToDate(item.from);
-					const toDate = convertStringToDate(item.to);
+					const fromDate = item.from.getTime();
+					const toDate = item.to.getTime();
 	
 					if (fromDate <= currentDate && currentDate <= toDate) {
 						selectedDates.value = selectedDates.value.filter(value => value !== item);
@@ -86,7 +85,9 @@
 	}
 	
 
-	const isSelected = (date: string): boolean => !!selectedDates.value.find(item => item.from === date || item?.to === date);
+	const isSelected = (date: Date): boolean => !!selectedDates.value.find(item => item.from.getTime() === date.getTime() || item?.to?.getTime() === date.getTime());
+
+	watch(selectedDates, () => console.log(selectedDates.value))
 </script>
 
 
