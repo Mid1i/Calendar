@@ -1,12 +1,12 @@
 <script setup lang="ts">
-	import { computed, ref, inject, watch } from "vue";
+	import { computed, ref, inject } from "vue";
 	import type { TypeActions, ISelectedDates } from "@/interfaces/IDay";
 	import CalendarHeader from "@/components/CalendarHeader.vue";
+	import CalendarFooter from "@/components/CalendarFooter.vue";
 	import CalendarBody from "@/components/CalendarBody.vue";
-	import { compareDates } from "@/helpers/calendar";
 	import { convertStringToDate } from "@/helpers/converters";
+	import { compareDates } from "@/helpers/calendar";
 	import { getLastElement } from "@/helpers/global";
-	// import CalendarFooter from "@/components/CalendarFooter.vue";
 
 
 	const currentAction = <TypeActions>inject("action");
@@ -43,38 +43,46 @@
 
 
 	const updateSelectedDates = (date: string): void => {
-		if (["oneDate", "severalDates"].includes(currentAction)) {
-			selectedDates.value = isSelected(date) ? selectedDates.value.filter(item => item?.from !== date) : [...(currentAction === "oneDate" ? [] : selectedDates.value), { from: date }];
-		} else {
-			const currentDate = convertStringToDate(date);
-			const lastElement = getLastElement(selectedDates.value);
-			
-			if (date === lastElement?.from) {
-				selectedDates.value = selectedDates.value.slice(0, -1);
-				return;
-			}
+		const currentDate = convertStringToDate(date);
+		const lastElement = getLastElement(selectedDates.value);
 
-			if (lastElement?.to) {
-				for (let item of selectedDates.value) {
-					if (item.from && item?.to) {
-						const fromDate = convertStringToDate(item.from);
-						const toDate = convertStringToDate(item.to);
-		
-						if (fromDate <= currentDate && currentDate <= toDate) {
-							selectedDates.value = selectedDates.value.filter(value => value !== item);
-							return;
-						}
+		const isOneDateAction = currentAction === "oneDate";
+		const isSeveralDatesAction = currentAction === "severalDates";
+		const isOnePeriodAction = currentAction === "onePeriod";
+
+		if (isOneDateAction || isSeveralDatesAction) {
+			selectedDates.value = isSelected(date) 
+				? selectedDates.value.filter(item => item?.from !== date) 
+				: [...(isOneDateAction ? [] : selectedDates.value), { from: date }];
+
+			return;
+		}
+
+		if (date === lastElement?.from) {
+			selectedDates.value = selectedDates.value.slice(0, -1);
+			return;
+		}
+
+		if (lastElement?.to) {
+			for (let item of selectedDates.value) {
+				if (item.from && item?.to) {
+					const fromDate = convertStringToDate(item.from);
+					const toDate = convertStringToDate(item.to);
+	
+					if (fromDate <= currentDate && currentDate <= toDate) {
+						selectedDates.value = selectedDates.value.filter(value => value !== item);
+						return;
 					}
 				}
 			}
-
-			if (selectedDates.value.length === 0 || lastElement?.to) {
-				selectedDates.value = [...selectedDates.value, { from: date }];
-				return;
-			}
-
-			selectedDates.value = [...(currentAction === "onePeriod" ? [] : selectedDates.value.slice(0, -1)), compareDates(date, lastElement)];
 		}
+
+		if (selectedDates.value.length === 0 || lastElement?.to) {
+			selectedDates.value = [...selectedDates.value, { from: date }];
+			return;
+		}
+
+		selectedDates.value = [...(isOnePeriodAction ? [] : selectedDates.value.slice(0, -1)), compareDates(date, lastElement)];
 	}
 	
 
@@ -96,6 +104,9 @@
 			:selectedDates="selectedDates"
 			:month="currentMonth"
 			:year="currentYear"
+		/>
+		<CalendarFooter
+			:selectedDates="selectedDates"
 		/>
 	</div>
 </template>

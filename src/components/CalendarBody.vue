@@ -1,8 +1,8 @@
 <script setup lang="ts">
 	import { computed, inject } from "vue";
 	import type { TypeActions, ISelectedDates } from "@/interfaces/IDay";
-	import { getDay, isInRange } from "@/helpers/calendar";
 	import { convertDateToString } from "@/helpers/converters";
+	import { getDay, isInRange } from "@/helpers/calendar";
 
 
 	interface IDay {

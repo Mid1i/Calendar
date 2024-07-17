@@ -4,7 +4,7 @@
 	import Calendar from "@/components/Calendar.vue";
 
 
-	const action: TypeActions = "oneDate";
+	const action: TypeActions = "severalPeriods";
 
 	provide("action", action);
 </script>
