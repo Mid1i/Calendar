@@ -1,5 +1,5 @@
 export const convertNumberToMonth = (month: number): string => {
-	const months: Record<string, string> = {
+	const months: Record<number, string> = {
 		0: "Январь",
 		1: "Февраль",
 		2: "Март",

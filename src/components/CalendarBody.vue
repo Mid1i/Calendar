@@ -3,6 +3,7 @@
 	import type { ISelectedDates } from "@/interfaces/ISelectedDates";
 	import type { TypeActions } from "@/types/TypeActions";
 	import { getDay, isInRange } from "@/helpers/calendar";
+	import { isPeriodAction } from "@/helpers/global";
 
 
 	interface IDay {
@@ -23,16 +24,16 @@
 	}>();
 
 
-	const days = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+	const days: string[] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
 	const currentAction = <TypeActions>inject("action");
 
 
-	const getMonthDates = computed(() => {
-		let date = new Date(props.year, props.month);
+	const getMonthDates = computed<IDay[]>(() => {
+		let date: Date = new Date(props.year, props.month);
 		let monthDates: IDay[] = [];
 		
-		const firstDayOfMonth = getDay(date);
+		const firstDayOfMonth: number = getDay(date);
 		
 		date.setDate(date.getDate() - firstDayOfMonth);
 
@@ -68,7 +69,7 @@
 			:key="index"
 			:class="[
 				'calendar__item',
-				(!isMuted && (currentAction === 'SEVERAL_PERIODS' || currentAction === 'ONE_PERIOD')) && isInRange(date, selectedDates),
+				(!isMuted && isPeriodAction(currentAction)) && isInRange(date, selectedDates),
 			]"
 		>
 			<span 
@@ -161,13 +162,25 @@
 				width: 100%;
 				z-index: 1;
 
+				&:focus {
+					background: $--tertiary-back;
+				}
+
 				&.selected {
 					background: $--blue;
+
+					&:focus {
+						background: lighten(#0A84FF, 10%);
+					}
 				}
 	
 				&.muted {
 					color: $--secondary-text;
 					pointer-events: none;
+
+					&:focus {
+						background: transparent;
+					}
 				}
 			}
 		}
@@ -185,18 +198,15 @@
 
 
 	@media(hover: hover) {
-		.calendar__item-button:hover,
-		.calendar__item-button:focus {
+		.calendar__item-button:hover {
 			background: $--tertiary-back;
 		}
 
-		.calendar__item-button.selected:hover,
-		.calendar__item-button.selected:focus {
+		.calendar__item-button.selected:hover {
 			background: lighten(#0A84FF, 10%);
 		}
 
-		.calendar__item-button.muted:hover,
-		.calendar__item-button.muted:focus {
+		.calendar__item-button.muted:hover {
 			background: transparent;
 		}
 	}

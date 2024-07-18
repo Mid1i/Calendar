@@ -3,18 +3,18 @@ import { addLeadingZeros } from '@/helpers/global';
 
 
 export const getDay = (date: Date): number => {
-	const day = date.getDay();
+	const day: number = date.getDay();
 
 	return day === 0 ? 6 : day - 1;
 }
 
 export const isInRange = (date: Date, array: ISelectedDates[]): string => {
-	const currentDate = date.getTime();
+	const currentDate: number = date.getTime();
 
 	for (let { from, to } of array) {
 		if (from && to) {
-			const fromDate = from.getTime();
-			const toDate = to.getTime();
+			const fromDate: number = from.getTime();
+			const toDate: number = to.getTime();
 			
 			if (currentDate === fromDate && toDate) return "from";
 			if (currentDate === toDate) return "to";
@@ -26,8 +26,8 @@ export const isInRange = (date: Date, array: ISelectedDates[]): string => {
 }
 
 export const compareDates = (date: Date, element: ISelectedDates): ISelectedDates => {
-	const date1 = element.from.getTime();
-	const date2 = date.getTime();
+	const date1: number = element.from.getTime();
+	const date2: number = date.getTime();
 
 	return (date1 < date2) ? { from: element.from, to: date } : { from: date, to: element.from };
 }

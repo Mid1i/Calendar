@@ -4,6 +4,7 @@
 	import type { TypeActions } from "@/types/TypeActions";
 	import { getFullDate } from "@/helpers/calendar";
 	import { getWordByAmount } from "@/helpers/words";
+	import { isPeriodAction } from "@/helpers/global";
 
 
 	const props = defineProps<{
@@ -15,25 +16,26 @@
 
 
 	const getTitle = computed<string>(() => {
-		const length = props.selectedDates.length;
-		const isSingle = length === 1;
-
+		const length: number = isPeriodAction(currentAction) ? props.selectedDates.filter((item) => item.from && item?.to).length : props.selectedDates.length;
+		const isSingle: boolean = length === 1;
+		
 		if (length === 0) return "";
 
-		if (currentAction === "ONE_DATE" || (currentAction === "SEVERAL_DATES" && isSingle)) return "Выбранная дата:";
-		
-		if (currentAction === "SEVERAL_DATES") return `Выбраны ${length} ${getWordByAmount(length, "дата", "даты", "дат")}:`;
-		
-		if (currentAction === "ONE_PERIOD" || (currentAction === "SEVERAL_PERIODS" && isSingle)) return "Выбранный период:";
+		const titles: Record<TypeActions, () => string> = {
+			ONE_DATE: () => "Выбранная дата:",
+			SEVERAL_DATES: () => isSingle ? "Выбранная дата:" : `Выбраны ${length} ${getWordByAmount(length, "дата", "даты", "дат")}:`,
+			ONE_PERIOD: () => "Выбранный период:",
+			SEVERAL_PERIODS: () => `Выбраны ${length} ${getWordByAmount(length, "период", "периода", "периодов")}:`
+		};
 
-		return `Выбраны ${length} ${getWordByAmount(length, "период", "периода", "периодов")}:`;		
+		return titles[currentAction]();
 	});
 
 
-	const getDate = (date: ISelectedDates): string => {
-		if (currentAction === "ONE_DATE" || currentAction === "SEVERAL_DATES") return getFullDate(date.from);
+	const getSelectedDate = (date: ISelectedDates): string => {
+		if (!isPeriodAction(currentAction)) return getFullDate(date.from);
 
-		if (date.to) {
+		if (date?.to) {
 			const periodLength = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 			return `${getFullDate(date.from)}-${getFullDate(date.to)} (${periodLength} ${getWordByAmount(periodLength, "день", "дня", "дней")})`;
 		}
@@ -45,21 +47,15 @@
 
 <template>
 	<footer class="footer">
-		<h2 class="footer__title">{{ getTitle }}</h2>
-		<!-- <h2 class="footer__title">Выбраны 2 даты:</h2> -->
 		<ul class="footer__list">
+			<li class="footer__list-title">{{ getTitle }}</li>
 			<li 
 				v-for="(date, index) in selectedDates"
 				:key="index"
-				class="footer__list-el"
+				:class="['footer__list-el', isPeriodAction(currentAction) && 'period']"
 			>
-				{{ `${getDate(date)}${index === selectedDates.length - 1 ? "" : ","}` }}
+				{{ `${getSelectedDate(date)}${index === selectedDates.length - 1 ? "" : ","}` }}
 			</li>
-			<!-- <li class="footer__list-el">12.06.2024,</li>
-			<li class="footer__list-el">12.06.2024</li>
-			<li class="footer__list-el">12.06.2024</li>
-			<li class="footer__list-el">12.06.2024</li>
-			<li class="footer__list-el">12.06.2024</li> -->
 		</ul>
 	</footer>
 </template>
@@ -70,15 +66,6 @@
 
 
 	.footer {
-		align-items: center;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 5px;
-
-		&__title {
-			font-size: 18px;
-			font-weight: 500;
-		}
 
 		&__list {
 			align-items: center;
@@ -86,8 +73,18 @@
 			flex-wrap: wrap;
 			gap: 5px;
 
+			&-title {
+				font-size: 18px;
+				font-weight: 500;
+			}
+
 			&-el {
 				font-size: 16px;
+				width: 85px;
+
+				&.period {
+					width: 250px;
+				}
 			}
 		}
 	}

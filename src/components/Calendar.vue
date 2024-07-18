@@ -1,17 +1,16 @@
 <script setup lang="ts">
-	import { computed, inject, ref, watch } from "vue";
+	import { computed, inject, ref } from "vue";
 	import type { ISelectedDates } from "@/interfaces/ISelectedDates";
 	import type { TypeActions } from "@/types/TypeActions";
 	import CalendarFooter from "@/components/CalendarFooter.vue";
 	import CalendarHeader from "@/components/CalendarHeader.vue";
 	import CalendarBody from "@/components/CalendarBody.vue";
 	import { compareDates } from "@/helpers/calendar";
-	import { getLastElement } from "@/helpers/global";
 
 
 	const currentAction = <TypeActions>inject("action");
 
-	const currentDate = new Date();
+	const currentDate: Date = new Date();
 
 	const currentYear = ref<number>(currentDate.getFullYear());
 	const currentMonth = ref<number>(currentDate.getMonth());
@@ -42,12 +41,13 @@
 	}
 
 	const updateSelectedDates = (date: Date): void => {
-		const currentDate = date.getTime();
-		const lastElement = getLastElement(selectedDates.value);
+		const currentDate: number = date.getTime();
+		const lastElement: ISelectedDates | undefined = selectedDates.value[selectedDates.value.length - 1];
 
-		const isOneDateAction = currentAction === "ONE_DATE";
-		const isSeveralDatesAction = currentAction === "SEVERAL_DATES";
-		const isOnePeriodAction = currentAction === "ONE_PERIOD";
+		const isOneDateAction: boolean = currentAction === "ONE_DATE";
+		const isSeveralDatesAction: boolean = currentAction === "SEVERAL_DATES";
+		const isOnePeriodAction: boolean = currentAction === "ONE_PERIOD";
+
 
 		if (isOneDateAction || isSeveralDatesAction) {
 			selectedDates.value = isSelected(date) 
@@ -65,8 +65,8 @@
 		if (lastElement?.to) {
 			for (let item of selectedDates.value) {
 				if (item.from && item?.to) {
-					const fromDate = item.from.getTime();
-					const toDate = item.to.getTime();
+					const fromDate: number = item.from.getTime();
+					const toDate: number = item.to.getTime();
 	
 					if (fromDate <= currentDate && currentDate <= toDate) {
 						selectedDates.value = selectedDates.value.filter(value => value !== item);
@@ -86,8 +86,6 @@
 	
 
 	const isSelected = (date: Date): boolean => !!selectedDates.value.find(item => item.from.getTime() === date.getTime() || item?.to?.getTime() === date.getTime());
-
-	watch(selectedDates, () => console.log(selectedDates.value))
 </script>
 
 

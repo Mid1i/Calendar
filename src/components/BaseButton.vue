@@ -21,6 +21,9 @@
 
 
 <style scoped lang="scss">
+	@import "@/assets/styles/variables.scss";
+
+
 	.button {
 		background: transparent;
 		
@@ -29,8 +32,25 @@
 		width: 24px;
 
 		&__icon {
+			color: $--primary-text;
 			height: 100%;
 			width: 100%;
+
+			& path {
+				transition: all 0.1s ease-in-out;
+				stroke: currentColor;
+			}
+		}
+
+		&:focus svg {
+			color: $--blue; 
+		}
+	}
+
+
+	@media(hover: hover) {
+		.button__icon:hover {
+			color: $--blue; 
 		}
 	}
 </style>
