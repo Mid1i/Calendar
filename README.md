@@ -1,5 +1,18 @@
-# Vue 3 + TypeScript + Vite
+# Календарь
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Реализация календаря, имеющего различные режимы выбора дат:
+- Конкретная дата
+- Несколько конкретных дат
+- Один период времени
+- Несколько периодов времени
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## Стек технологий:
+- TypeScript
+- Vue.js
+- SCSS
+
+## Скриншоты календаря
+<img alt="Выбор периода" src="./src/assets/images/period-screen.png"/>
+Режим с одним периодом времени
+
+<img alt="Выбор нескольких дат" src="./src/assets/images/several-dates-screen.png"/>
