@@ -69,12 +69,12 @@
 			:key="index"
 			:class="[
 				'calendar__item',
-				(!isMuted && isPeriodAction(currentAction)) && isInRange(date, selectedDates),
+				isPeriodAction(currentAction) && isInRange(date, selectedDates),
 			]"
 		>
 			<span 
-				@click="() => !isMuted && $emit('updateSelectedDates',date)"
-				@keydown.enter="() => !isMuted && $emit('updateSelectedDates', date)"
+				@click="() => $emit('updateSelectedDates',date)"
+				@keydown.enter="() => $emit('updateSelectedDates', date)"
 				:class="[
 					'calendar__item-button',
 					isMuted && 'muted',
@@ -165,21 +165,17 @@
 				&:focus {
 					background: $--tertiary-back;
 				}
-
-				&.selected {
-					background: $--blue;
-
-					&:focus {
-						background: lighten(#0A84FF, 10%);
-					}
-				}
 	
 				&.muted {
 					color: $--secondary-text;
-					pointer-events: none;
+				}
+
+				&.selected {
+					background: $--blue;
+					color: $--primary-text;
 
 					&:focus {
-						background: transparent;
+						background: lighten(#0A84FF, 10%);
 					}
 				}
 			}
@@ -204,10 +200,6 @@
 
 		.calendar__item-button.selected:hover {
 			background: lighten(#0A84FF, 10%);
-		}
-
-		.calendar__item-button.muted:hover {
-			background: transparent;
 		}
 	}
 </style>
