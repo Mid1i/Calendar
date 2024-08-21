@@ -1,3 +1,11 @@
+/**
+ * Получение названия месяца по его номеру.
+ * 0 - Январь, 11 - Декабрь.
+ * 
+ * @param {number} month - Номер месяца.
+ * 
+ * @returns {string} Название месяца.
+ */
 export const convertNumberToMonth = (month: number): string => {
 	const months: Record<number, string> = {
 		0: "Январь",

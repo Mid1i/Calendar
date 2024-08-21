@@ -6,29 +6,84 @@
 	import { isPeriodAction } from "@/helpers/global";
 
 
+	/**
+	 * Интерфейс объекта даты в календаре.
+	 */
 	interface IDay {
+		/**
+		 * Текущая дата.
+		 * 
+		 * @type {Date}
+		 */
 		date: Date,
+		/**
+		 * Пометка для стилизации дат предыдущего и следующего месяцев.
+		 * 
+		 * @type {boolean}
+		 */
 		isMuted: boolean
 	}
 
 
 	const props = defineProps<{
+		/**
+		 * Проверяет, является ли дата уже выбранной или нет.
+		 * 
+		 * @param {Date} date - Дата для проверки.
+		 * @return {boolean} Возвращает true если дата уже выбрана; в противном случае - false. 
+		 */
 		isSelected: (date: Date) => boolean,
+		/**
+		 * Массив дат, выбранных пользователем.
+		 * 
+		 * @type {ISelectedDates[]}
+		 */
 		selectedDates: ISelectedDates[],
+		/**
+		 * Текущий месяц в виде числа (0-11).
+		 * 
+		 * @type {number}
+		 */
 		month: number,
+		/**
+		 * Текущий год.
+		 * 
+		 * @type {number}
+		 */
 		year: number
 	}>();
 
 	defineEmits<{
+		/**
+		 * Вызывается, когда пользователь выбирает дату.
+		 * 
+		 * @param {string} e - Название события, всегда "updateSelectedDates".
+		 * @param {Date} date - Выбранная дата.
+		 */
 		(e: "updateSelectedDates", date: Date): void
 	}>();
 
-
+	/**
+	 * Массив дней недели.
+	 * 
+	 * @type {string[]}
+	 */
 	const days: string[] = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
-	const currentAction = <TypeActions>inject("action");
+	/**
+		* Текущий режим календаря.
+		*
+		* @type {TypeActions}
+		*/
+	const currentAction: TypeActions = <TypeActions>inject("action");
 
-
+	/**
+	 * Вычисляемое свойство, заполняющее массив дат, соответствующих текущему месяцу.
+	 * - Массив включает несколько дат из предыдущего и следующего месяцев.
+	 * - Даты предыдущего и следующего месяцев помечены "isMuted".
+	 * 
+	 * @returns {IDay[]} Массив объектов IDay, представляющих все даты, которые должны быть показаны в календаре для текущего месяца.
+	 */
 	const getMonthDates = computed<IDay[]>(() => {
 		let date: Date = new Date(props.year, props.month);
 		let monthDates: IDay[] = [];

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-	import { computed, inject, ref } from "vue";
+	import { Ref, computed, inject, ref } from "vue";
 	import type { ISelectedDates } from "@/interfaces/ISelectedDates";
 	import type { TypeActions } from "@/types/TypeActions";
 	import CalendarFooter from "@/components/CalendarFooter.vue";
@@ -8,16 +8,47 @@
 	import { compareDates } from "@/helpers/calendar";
 
 
-	const currentAction = <TypeActions>inject("action");
+	/**
+		* Текущий режим календаря.
+		*
+		* @type {TypeActions}
+		*/
+	const currentAction: TypeActions = <TypeActions>inject("action");
 
+	/**
+	 * Текущая дата.
+	 * 
+	 * @type {Date}
+	 */
 	const currentDate: Date = new Date();
 
-	const currentYear = ref<number>(currentDate.getFullYear());
-	const currentMonth = ref<number>(currentDate.getMonth());
+	/**
+	 * Текущий год.
+	 * 
+	 * @type {Ref<number>}
+	 */
+	const currentYear: Ref<number> = ref(currentDate.getFullYear());
 
-	const selectedDates = ref<ISelectedDates[]>([]);
+	/**
+	 * Текущий месяц в виде числа (0-11).
+	 * 0 - Январь, 11 - Декабрь.
+	 * 
+	 * @type {Ref<number>}
+	 */
+	const currentMonth: Ref<number> = ref(currentDate.getMonth());
 
+	/**
+	 * Массив выбранных пользователем дат.
+	 * 
+	 * @type {Ref<ISelectedDates[]>}
+	 */
+	const selectedDates: Ref<ISelectedDates[]> = ref([]);
 
+	/**
+	 * Вычисляемое свойство, которое создает заголовок календаря в зависимости от текущего режима.
+	 * 
+	 * @returns {string} Заголовок календаря.
+	 */
 	const getTitle = computed<string>(() => {
 		const titles: Record<TypeActions, string> = {
 			ONE_DATE: "Выберите дату формирования отчёта",
@@ -29,7 +60,12 @@
 		return titles[currentAction];
 	})
 
-
+	/**
+	 * Меняет месяц в зависимости от направления.
+	 * 
+	 * @param {boolean} isPrevious - Если true, меняет на предыдущий месяц; в противном случае, меняет на следующий.
+	 * @returns {void}
+	 */
 	const changeMonth = (isPrevious?: boolean): void => {
 		if (isPrevious) {
         currentMonth.value = (currentMonth.value + 11) % 12;
@@ -40,6 +76,13 @@
     }
 	}
 
+	/**
+	 * Обновление выбранных пользователем дат, в зависимости от режима календаря.
+	 * - Если дата уже выбрана, она удаляется из массива; иначе, добавляется.
+	 * 
+	 * @param {Date} date - Выбранная дата.
+	 * @returns {void}
+	 */
 	const updateSelectedDates = (date: Date): void => {
 		const currentDate: number = date.getTime();
 		const lastElement: ISelectedDates | undefined = selectedDates.value[selectedDates.value.length - 1];
@@ -84,7 +127,12 @@
 		selectedDates.value = [...(isOnePeriodAction ? [] : selectedDates.value.slice(0, -1)), compareDates(date, lastElement)];
 	}
 	
-
+	/**
+	 * Проверяет, выбрана ли уже дата.
+	 * 
+	 * @param {Date} date - Дата для проверки.
+	 * @returns {boolean} True, если дата выбрана; в противном случае - false. 
+	 */
 	const isSelected = (date: Date): boolean => !!selectedDates.value.find(item => item.from.getTime() === date.getTime() || item?.to?.getTime() === date.getTime());
 </script>
 

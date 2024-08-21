@@ -8,13 +8,26 @@
 
 
 	const props = defineProps<{
+		/**
+		 * Массив выбранных пользователем дат.
+		 * 
+		 * @type {ISelectedDates[]}
+		 */
 		selectedDates: ISelectedDates[]
 	}>();
 
+	/**
+		* Текущий режим календаря.
+		*
+		* @type {TypeActions}
+		*/
+	const currentAction: TypeActions = <TypeActions>inject("action");
 
-	const currentAction = <TypeActions>inject("action");
-
-
+	/**
+	 * Вычисляемое свойство, которое создает заголовок в зависимости от текущего режима и выбранных дат.
+	 * 
+	 * @returns {string} Заголовок календаря.
+	 */
 	const getTitle = computed<string>(() => {
 		const length: number = isPeriodAction(currentAction) ? getPeriodDatesLength.value : props.selectedDates.length;
 		const isSingle: boolean = length === 1;
@@ -32,10 +45,23 @@
 		return titles[currentAction];
 	});
 
-
+	/**
+	 * Вычисляемое свойство, которое получает количество выбранных дат/периодов.
+	 * 
+	 * @returns {number} Число выбранных дат/периодов.
+	 */
 	const getPeriodDatesLength = computed<number>(() => props.selectedDates.filter(item => item.from && item?.to).length);
 
-
+	/**
+	 * Получение строкового представления выбранных пользователем дат.
+	 * 
+	 * @param {ISelectedDate} date - Выбранная дата. 
+	 * @param {number} index - Индекс текущей даты в массиве "selectedDates". 
+	 * 
+	 * @returns {string} Возвращает строковое представление выбранных дат. 
+	 * - Если режим не является периодом: "01.01.2024, 02.01.2024, ..."
+	 * - Если режим является периодом: "01.01.2024-05.01.2024 (5 дней), ..."  
+	 */
 	const getSelectedDate = (date: ISelectedDates, index: number): string => {
 		if (!isPeriodAction(currentAction)) return `${getFullDate(date.from)}${index === props.selectedDates.length - 1 ? "" : ", "}`;
 		
