@@ -5,16 +5,11 @@
 	import { getFullDate } from "@/helpers/calendar";
 	import { getWordByAmount } from "@/helpers/words";
 	import { isPeriodAction } from "@/helpers/global";
+	import { useCalendarStore } from "@/store/calendar";
 
 
-	const props = defineProps<{
-		/**
-		 * Массив выбранных пользователем дат.
-		 * 
-		 * @type {ISelectedDates[]}
-		 */
-		selectedDates: ISelectedDates[]
-	}>();
+	const store = useCalendarStore();
+
 
 	/**
 		* Текущий режим календаря.
@@ -29,9 +24,9 @@
 	 * @returns {string} Заголовок календаря.
 	 */
 	const getTitle = computed<string>(() => {
-		const length: number = isPeriodAction(currentAction) ? getPeriodDatesLength.value : props.selectedDates.length;
+		const length: number = isPeriodAction(currentAction) ? getPeriodDatesLength.value : store.selectedDates.length;
 		const isSingle: boolean = length === 1;
-		console.log(isPeriodAction(currentAction) ?  getPeriodDatesLength.value - 1 : props.selectedDates.length - 1)
+		console.log(isPeriodAction(currentAction) ?  getPeriodDatesLength.value - 1 : store.selectedDates.length - 1)
 		
 		if (length === 0) return "";
 
@@ -50,7 +45,7 @@
 	 * 
 	 * @returns {number} Число выбранных дат/периодов.
 	 */
-	const getPeriodDatesLength = computed<number>(() => props.selectedDates.filter(item => item.from && item?.to).length);
+	const getPeriodDatesLength = computed<number>(() => store.selectedDates.filter(item => item.from && item?.to).length);
 
 	/**
 	 * Получение строкового представления выбранных пользователем дат.
@@ -63,7 +58,7 @@
 	 * - Если режим является периодом: "01.01.2024-05.01.2024 (5 дней), ..."  
 	 */
 	const getSelectedDate = (date: ISelectedDates, index: number): string => {
-		if (!isPeriodAction(currentAction)) return `${getFullDate(date.from)}${index === props.selectedDates.length - 1 ? "" : ", "}`;
+		if (!isPeriodAction(currentAction)) return `${getFullDate(date.from)}${index === store.selectedDates.length - 1 ? "" : ", "}`;
 		
 		if (date?.to) {
 			const periodLength: number = Math.ceil((date.to.getTime() - date.from.getTime()) / (1000 * 60 * 60 * 24)) + 1;
@@ -81,7 +76,7 @@
 		<ul class="footer__list">
 			<li class="footer__list-title">{{ getTitle }}</li>
 			<li 
-				v-for="(date, index) in selectedDates"
+				v-for="(date, index) in store.selectedDates"
 				:key="index"
 				:class="[
 					'footer__list-el', 

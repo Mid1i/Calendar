@@ -1,9 +1,9 @@
 <script setup lang="ts">
 	import { computed, inject } from "vue";
-	import type { ISelectedDates } from "@/interfaces/ISelectedDates";
 	import type { TypeActions } from "@/types/TypeActions";
 	import { getDay, isInRange } from "@/helpers/calendar";
 	import { isPeriodAction } from "@/helpers/global";
+	import { useCalendarStore } from "@/store/calendar";
 
 
 	/**
@@ -25,43 +25,7 @@
 	}
 
 
-	const props = defineProps<{
-		/**
-		 * Проверяет, является ли дата уже выбранной или нет.
-		 * 
-		 * @param {Date} date - Дата для проверки.
-		 * @return {boolean} Возвращает true если дата уже выбрана; в противном случае - false. 
-		 */
-		isSelected: (date: Date) => boolean,
-		/**
-		 * Массив дат, выбранных пользователем.
-		 * 
-		 * @type {ISelectedDates[]}
-		 */
-		selectedDates: ISelectedDates[],
-		/**
-		 * Текущий месяц в виде числа (0-11).
-		 * 
-		 * @type {number}
-		 */
-		month: number,
-		/**
-		 * Текущий год.
-		 * 
-		 * @type {number}
-		 */
-		year: number
-	}>();
-
-	defineEmits<{
-		/**
-		 * Вызывается, когда пользователь выбирает дату.
-		 * 
-		 * @param {string} e - Название события, всегда "updateSelectedDates".
-		 * @param {Date} date - Выбранная дата.
-		 */
-		(e: "updateSelectedDates", date: Date): void
-	}>();
+	const store = useCalendarStore();
 
 	/**
 	 * Массив дней недели.
@@ -85,7 +49,7 @@
 	 * @returns {IDay[]} Массив объектов IDay, представляющих все даты, которые должны быть показаны в календаре для текущего месяца.
 	 */
 	const getMonthDates = computed<IDay[]>(() => {
-		let date: Date = new Date(props.year, props.month);
+		let date: Date = new Date(store.currentYear, store.currentMonth);
 		let monthDates: IDay[] = [];
 		
 		const firstDayOfMonth: number = getDay(date);
@@ -93,7 +57,7 @@
 		date.setDate(date.getDate() - firstDayOfMonth);
 
 		const previousMonthCondition = (): boolean => monthDates.length < firstDayOfMonth;
-		const currentMonthCondition = (): boolean => date.getMonth() === props.month;
+		const currentMonthCondition = (): boolean => date.getMonth() === store.currentMonth;
 		const nextMonthCondition = (): boolean => getDay(date) !== 0 && getDay(date) < 7;
 		
 		while (previousMonthCondition() || currentMonthCondition() || nextMonthCondition()) {
@@ -124,16 +88,16 @@
 			:key="index"
 			:class="[
 				'calendar__item',
-				isPeriodAction(currentAction) && isInRange(date, selectedDates),
+				isPeriodAction(currentAction) && isInRange(date, store.selectedDates),
 			]"
 		>
 			<span 
-				@click="() => $emit('updateSelectedDates',date)"
-				@keydown.enter="() => $emit('updateSelectedDates', date)"
+				@click="() => store.updateSelectedDates(date, currentAction)"
+				@keydown.enter="() => store.updateSelectedDates(date, currentAction)"
 				:class="[
 					'calendar__item-button',
 					isMuted && 'muted',
-					isSelected(date) && 'selected'
+					store.isSelected(date) && 'selected'
 				]"
 				tabindex="0"
 			>

@@ -1,41 +1,18 @@
 <script setup lang="ts">
 	import BaseButton from "@/components/BaseButton.vue";
 	import { convertNumberToMonth } from "@/helpers/converters";
+	import { useCalendarStore } from "@/store/calendar";
 
 
-	defineProps<{
-		/**
-		 * Текущий месяц в виде числа (0-11).
-		 * 
-		 * @type {number}
-		 */
-		month: number,
-		/**
-		 * Текущий год.
-		 * 
-		 * @type {number}
-		 */
-		year: number
-	}>();
-	
-	defineEmits<{
-		/**
-		 * Вызывается, когда необходимо сменить месяц.
-		 * 
-		 * @param {string} e - Название события, всегда "changeMonth".
-		 * @param {boolean} isPrevious - Необязательный флаг, который обозначает направление смены месяца.
-		 * Если True, меняется на предыдущий месяц, в противном случае - на следующий.
-		 */
-		(e: "changeMonth", isPrevious?: boolean): void
-	}>();
+	const store = useCalendarStore();
 </script>
 
 
 <template>
 	<header class="header">
-		<BaseButton @click="$emit('changeMonth', true)" isPrevious/>
-		<h1 class="header__title">{{ `${convertNumberToMonth(month)}, ${year}` }}</h1>
-		<BaseButton @click="$emit('changeMonth')"/>
+		<BaseButton @click="() => store.changeMonth(true)" isPrevious/>
+		<h1 class="header__title">{{ `${convertNumberToMonth(store.currentMonth)}, ${store.currentYear}` }}</h1>
+		<BaseButton @click="() => store.changeMonth()"/>
 	</header>
 </template>
 
